@@ -230,8 +230,8 @@
 	    :initial-value (car l)
 	    :from-end t)))
 
-(defun append-group-total-test ()
-  (cl-test-more:is
-   (append-group-total 2 '((0 0 0) (1 1 1) (2 2 2) (3 3 3)))
-   '((0 0 0) (1 1 1) (2 2 2) (3 3 3) (2 2 2) (4 4 4))))
+(defun repeated-list (times elements)
+  (iter (for i :from 0 :to (1- times))
+	(appending elements)))
+
 (in-package :cl-user)

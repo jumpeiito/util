@@ -175,4 +175,5 @@
 	   #:filter-zipfile
 	   #:zero-padding
 	   #:append-total
-	   #:ruby-scan))
+	   #:ruby-scan
+	   #:repeated-list))
