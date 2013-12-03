@@ -145,6 +145,12 @@
   `(setf (aref ,array ,@subscripts)
 	 (cons ,value (aref ,array ,@subscripts))))
 
+(defun vector-sum (v1 v2)
+  (map 'vector
+       #'+
+       (coerce v1 'list)
+       (coerce v2 'list)))
+
 ;; (defparameter xl (mapcar (lambda (_) (random 100000)) (iota :from 0 :to 100000)))
 ;; (defparameter xf (map 'vector #'identity xl))
 

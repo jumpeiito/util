@@ -176,4 +176,5 @@
 	   #:zero-padding
 	   #:append-total
 	   #:ruby-scan
-	   #:repeated-list))
+	   #:repeated-list
+	   #:vector-sum))
