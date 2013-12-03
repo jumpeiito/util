@@ -59,7 +59,7 @@
 	(collect i)))
 
 (defun take (l n &key (from 0))
-  (declare (list l) (integer n from) (optimize (speed 3) (safety 0)))
+  (declare (type list l) (type integer n from) (optimize (speed 3) (safety 0)))
   (iter (for el :in (nthcdr from l))
 	(for counter :upfrom 0)
 	(declare (type fixnum counter))
