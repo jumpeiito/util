@@ -138,8 +138,8 @@
 	     (next-iteration))))
 
 (defmacro aref-1+ (array &rest subscripts)
-  `(setf (aref (the array ,array) ,@subscripts)
-	 (1+ (the fixnum (aref ,array ,@subscripts)))))
+  `(setf (aref ,array ,@subscripts)
+	 (the fixnum (1+ (the fixnum (aref ,array ,@subscripts))))))
 
 (defmacro aref-cons (array value &rest subscripts)
   `(setf (aref ,array ,@subscripts)

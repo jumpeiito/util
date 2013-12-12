@@ -1,5 +1,43 @@
 (in-package :excel)
 
+
+ 
+;; ≪罫線の 位置 を指定する定数≫
+
+
+;; Borders コレクションの Item プロパティで使用する定数（XlBordersIndex）
+
+
+;; 定数 値 内容 
+;; xlDiagonalDown 5 セルに右下がりの斜線 (対角線) 
+;; xlDiagonalUp 6 セルに右上がりの斜線 (対角線) 
+;; xlEdgeBottom 9 セルの下の線 
+;; xlEdgeLeft 7 セルの左の線 
+;; xlEdgeRight 10 セルの右の線 
+;; xlEdgeTop 8 セルの上の線 
+;; xlInsideHorizontal 12 セル範囲の内側の横線 
+;; xlInsideVertical 11 セル範囲の内側の縦線 
+
+
+;; この頁のTOPへ↑Top 
+ 
+;; ≪罫線の 種類 を指定する定数≫
+
+
+;; LineStyle プロパティで使用する定数（XlLineStyle）
+
+
+;; 定数 値 内容 
+;; xlContinuous 1 実線 (初期値です) 
+;; xlDash -4115 破線 
+;; xlDashDot 4 一点鎖線 
+;; xlDashDotDot 5 二点鎖線 
+;; xlDot -4118 点線 
+;; xlDouble -4119 二重線 
+;; xlSlantDashDot 13 斜め一点鎖線 
+;; xlLineStyleNone -4142 線なし 
+
+
 (defconstant xldown		-4121)
 (defconstant xltoright		-4161)
 (defconstant xlcalcmanual	-4135)
@@ -47,10 +85,10 @@
        (handler-case
 	   (prog1
 	       (progn ,@body)
-	     ,(if quit
-		  `(progn
-		     (ole ,excel-application :quit)
-		     (setf ,excel-application nil))))
+	     (if ,quit
+		 (progn
+		   (ole ,excel-application :quit)
+		   (setf ,excel-application nil))))
 	 (error (e)
 	   (print e)
 	   (ole ,excel-application :quit)
@@ -65,8 +103,8 @@
      (handler-case
 	 (prog1
 	     (progn ,@body)
-	   ,(if close
-		`(ole ,book-variable :close)))
+	   (if ,close
+	       (ole ,book-variable :close)))
        (error (e)
 	 (print e)
 	 (ole ,book-variable :close)
@@ -217,9 +255,12 @@
      (let1 columns (column-expand start end)
        (let ((sym     (gensym))
 	     (counter (gensym)))
-	 `(if (eq ,(length columns) (length ,width))
+	 `(if (eq (the fixnum ,(length columns))
+		  (the fixnum (length (the simple-vector ,width))))
 	      (iter (for ,sym :in ',columns)
 		    (for ,counter :upfrom 0)
+		    (declare (type fixnum ,counter)
+			     (type number ,sym))
 		    (setf (slot-value ;; (range ,sheet-dispatch (col-to-number sym))
 			   (cl-win32ole:ole ,sheet-dispatch :range (format nil "~A:~:*~A" (number-to-col ,sym)))
 				      :ColumnWidth)
@@ -435,6 +476,15 @@
 
 (defmacro merge-cells (sheet-dispatch &rest range)
   `(setf (slot-value (range ,sheet-dispatch ,@range) :MergeCells) t))
+
+(defmacro page-setup (sheet &rest args)
+  `(progn
+     ,@(mapcar
+	(lambda (l)
+	  (optima:match l
+	    ((LIST sym value)
+	     `(setf (slot-value (ole ,sheet :PageSetup) ,sym) ,value))))
+      (group args 2))))
 ;; (defmacro set-font (sh &rest args)
 ;;   (optima:match column
 ;;     ((list start end)

@@ -27,4 +27,5 @@
 	   #:decide-range
 	   #:decide-range-value
 	   #:decide-range-borders
-	   #:merge-cells))
+	   #:merge-cells
+	   #:page-setup))
