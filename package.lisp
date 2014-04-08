@@ -149,6 +149,9 @@
   	   #:vector-find-if
   	   #:csv-read-to-list
   	   #:csv-read
+  	   #:csv-read-filter-map
+  	   #:csv-read-map-filter
+  	   #:csv-read-iter
   	   #:phash
   	   #:chash
   	   #:shash
@@ -177,4 +180,13 @@
 	   #:append-total
 	   #:ruby-scan
 	   #:repeated-list
-	   #:vector-sum))
+	   #:vector-sum
+	   #:list-split
+	   #:parallel
+	   #:diff
+	   #:line-binding
+	   #:nendo=
+	   #:group-by
+	   #:group-by-hash
+	   #:group-by-length
+	   #:group-by-length-hash))

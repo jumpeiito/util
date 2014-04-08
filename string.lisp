@@ -478,8 +478,8 @@
 ;; --> ((0 5) (5 10))
 (defun duo (list)
   (labels ((in (subl r)
-	     (cl-match:match subl
-	       ((list  x '*)   (reverse (cons (list x '*) r)))
+	     (optima:match subl
+			   ((list  x '*)   (reverse (cons (list x '*) r)))
 	       ((list* x '* z) (error "* must be on last."))
 	       ((list* x y z)  (in (cons (+ x y) z) (cons (list x (+ x y)) r)))
 	       ((list x)       (reverse r)))))

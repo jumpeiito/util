@@ -85,12 +85,189 @@
 		     (reverse r))))
 	(in (read-char ip nil nil nil) '() '() '()))))
 
+;; f:/20130628/特定健診全件データ.csv
+;; Evaluation took:
+;;   4.625 seconds of real time
+;;   4.468750 seconds of total run time (3.843750 user, 0.625000 system)
+;;   [ Run times consist of 1.437 seconds GC time, and 3.032 seconds non-GC time. ]
+;;   96.63% CPU
+;;   11,093,957,507 processor cycles
+;;   152,870,672 bytes consed
+
+;; Evaluation took:
+;;   3.266 seconds of real time
+;;   3.265625 seconds of total run time (3.0000000 user, 0.265625 system)
+;;   [ Run times consist of 0.563 seconds GC time, and 2.703 seconds non-GC time. ]
+;;   100.00% CPU
+;;   7,840,603,900 processor cycles
+;;   74,055,160 bytes consed
+
+(declaim (inline get-output-stream-string char-equal))
+
+(defun %read-iter (ip func &key (to nil) (separator #\,))
+  (declare (optimize (speed 3) (safety 0) (debug 0))
+	   (type stream ip))
+  (symbol-macrolet ((scan (read-char ip nil nil nil)))
+    (labels ((in (c col line counter)
+	       (if (and c (or (not to) (> (the fixnum to)
+					  (the fixnum counter))))
+		   (char-case c
+			      (#\Newline
+			       (let* ((o (get-output-stream-string col)))
+				 (funcall func (reverse (cons o line)))
+				 (in scan col '() (incf counter))))
+			      (separator
+			       (let ((o (get-output-stream-string col)))
+				 (in scan col (cons o line) counter)))
+			      (#\Return
+			       (in scan col line counter))
+			      (#\"
+			       (in scan col line counter))
+			      (t
+			       (progn
+				 (write-char c col)
+				 (in scan col line counter))))
+		   nil)))
+    (in scan (make-string-output-stream) '() 0))))
+
+(defun %read-map-filter (ip func pred &key (to nil) (separator #\,))
+  (declare (optimize (speed 3) (safety 0) (debug 0))
+	   (type stream ip))
+  (symbol-macrolet ((scan (read-char ip nil nil nil)))
+    (labels ((in (c col line r)
+	       (symbol-macrolet ((acc (cons o line))
+				 (rev (reverse (cons o line))))
+		 (if (and c (or (not to) (> (the fixnum to)
+					    (the fixnum (length (the list r))))))
+		     (char-case c
+				(#\Newline
+				 (in scan col '()
+				     ;; (let* ((o (get-output-stream-string col))
+				     ;; 	    (l (funcall func rev)))
+				     ;;   (if (funcall pred l) (cons l r) r))
+				     (let* ((o (get-output-stream-string col))
+					    (_rev rev))
+				       (if (funcall pred _rev)
+					   (cons (funcall func _rev) r)
+					   r))))
+				(separator
+				 (let ((o (get-output-stream-string col)))
+				   (in scan col acc r)))
+				(#\Return
+				 (in scan col line r))
+				(#\"
+				 (in scan col line r))
+				(t
+				 (progn
+				   (write-char c col)
+				   (in scan col line r))))
+		     (let ((o (get-output-stream-string col)))
+		       (optima:match (list o line)
+			 ((LIST "" nil) (reverse r))
+			 (_
+			  (let ((l (funcall func rev)))
+			    (if (funcall pred l)
+				(reverse (cons l r))
+				(reverse r))))))))))
+    (in scan (make-string-output-stream) '() '()))))
+
+(defun %read-filter-map (ip func pred &key (to nil) (separator #\,))
+  (declare (optimize (speed 3) (safety 0) (debug 0))
+	   (type stream ip))
+  (symbol-macrolet ((scan (read-char ip nil nil nil)))
+    (labels ((in (c col line r)
+	       (symbol-macrolet ((acc (cons o line))
+				 (rev (reverse (cons o line))))
+		 (if (and c (or (not to) (> (the fixnum to)
+					    (the fixnum (length (the list r))))))
+		     (char-case c
+				(#\Newline
+				 (in scan col '()
+				     (let* ((o (get-output-stream-string col))
+					    (l (funcall func rev)))
+				       (if (funcall pred l) (cons l r) r))))
+				(separator
+				 (let ((o (get-output-stream-string col)))
+				   (in scan col acc r)))
+				(#\Return
+				 (in scan col line r))
+				(#\"
+				 (in scan col line r))
+				(t
+				 (progn
+				   (write-char c col)
+				   (in scan col line r))))
+		     (let ((o (get-output-stream-string col)))
+		       (optima:match (list o line)
+			 ((LIST "" nil) (reverse r))
+			 (_
+			  (let ((l (funcall func rev)))
+			    (if (funcall pred l)
+				(reverse (cons l r))
+				(reverse r))))))))))
+    (in scan (make-string-output-stream) '() '()))))
+
+;; (defun csv-read (ip &key (to nil) (separator #\,))
+;;   (declare (optimize (speed 3) (safety 0) (debug 0))
+;; 	   (type stream ip))
+;;   (symbol-macrolet ((scan (read-char ip nil nil nil)))
+;;     (labels ((in (c col line r)
+;; 	       (if (and c (or (not to) (> (the fixnum to)
+;; 					  (the fixnum (length (the list r))))))
+;; 		   (char-case c
+;; 			      (#\Newline
+;; 			       (let ((o (get-output-stream-string col)))
+;; 				 (in scan col '() (cons (reverse (cons o line)) r))))
+;; 			      (separator
+;; 			       (let ((o (get-output-stream-string col)))
+;; 				 (in scan col (cons o line) r)))
+;; 			      (#\Return
+;; 			       (in scan col line r))
+;; 			      (#\"
+;; 			       (in scan col line r))
+;; 			      (t
+;; 			       (progn
+;; 				 (write-char c col)
+;; 				 (in scan col line r))))
+;; 		   (let ((o (get-output-stream-string col)))
+;; 		     (optima:match (list o line)
+;; 		       ((LIST "" nil) (reverse r))
+;; 		       (_
+;; 			(reverse (cons (reverse (cons o line)) r))))))))
+;;     (in scan (make-string-output-stream) '() '()))))
+
+;; (defun csv-read-to-list
+;;     (filename &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
+;; 		(to nil) (separator #\,))
+;;   ;; (with-open-file (ip filename :external-format (list code))
+;;   (with-open-file (ip filename :external-format code)
+;;     (csv-read ip :to to :separator separator)))
+
 (defun csv-read-to-list
     (filename &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
 		(to nil) (separator #\,))
+  (with-open-file (ip filename :external-format code)
+    (%read-filter-map ip #'identity #'identity :to to :separator separator)))
+
+(defun csv-read-iter
+    (filename func &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
+		(to nil) (separator #\,))
   ;; (with-open-file (ip filename :external-format (list code))
   (with-open-file (ip filename :external-format code)
-    (csv-read ip :to to :separator separator)))
+    ;; (csv-read ip :to to :separator separator)
+    (%read-iter ip func :to to :separator separator)))
+
+(defun csv-read-filter-map
+    (filename func pred &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
+		(to nil) (separator #\,))
+  (with-open-file (ip filename :external-format code)
+    (%read-filter-map ip func pred :to to :separator separator)))
+
+(defun csv-read-map-filter
+    (filename func pred &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
+		(to nil) (separator #\,))
+  (with-open-file (ip filename :external-format code)
+    (%read-map-filter ip func pred :to to :separator separator)))
 
 (defun last1 (list) (car (last list)))
 

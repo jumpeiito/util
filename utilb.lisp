@@ -157,4 +157,67 @@
 			(in cdr 1 car (cons (list start (1- (+ start flag))) r))))))))
     (in number-list 1 (car number-list) nil)))
 
+(defun list-split (l n)
+  (let ((length (1+ (truncate (/ (length l) n)))))
+    (labels ((inner (subl r)
+	       (if (null subl)
+		   (reverse r)
+		   (inner (drop subl length) (cons (take subl length) r)))))
+      (inner l nil))))
+
+(defmacro parallel (n target-list fn)
+  (let ((gensym-list (mapcar (lambda (_) (declare (ignore _)) (gensym))
+			     (iota :from 1 :to n)))
+	(list (gensym)))
+    `(let* ((,list (list-split ,target-list ,n))
+	    ,@(mapcar-with-index
+	       (lambda (i gensym)
+		 `(,gensym (sb-thread::make-thread (lambda () (,fn (nth ,i ,list))))))
+	       gensym-list))
+       (append ,@(mapcar
+		  (lambda (g)
+		    `(sb-thread::join-thread ,g))
+		  gensym-list)))))
+
+(defmacro line-binding ((line type) args &rest forms)
+  (let* ((package (package-name (symbol-package type)))
+	 (makefn  (alexandria:format-symbol package "MAKE-~A" type))
+	 (obj     (intern "OBJ" package))
+	 (none    (intern "_" package)))
+    `(let1 ,obj (,makefn)
+       (with-slots ,(remove-if (lambda (sym) (eq sym none)) args) ,obj
+	 ,@(mapcar
+	    (lambda (pair)
+	      `(setq ,(car pair) (nth ,(cdr pair) ,line)))
+	    (remove-if
+	     (lambda (pair) (eq (car pair) none))
+	     (mapcar-with-index (lambda (num arg) (cons arg num))
+				args)))
+	 ,@forms
+	 ,obj))))
+
+(defun group-by-hash (list func)
+  (iter (with hash = (make-hash-table :test #'equal))
+	(for el :in list)
+	(setf (gethash (funcall func el) hash)
+	      (cons el (gethash (funcall func el) hash)))
+	(finally (return hash))))
+
+(defun group-by (list func)
+  (alexandria:hash-table-alist
+   (group-by-hash list func)))
+
+(defun group-by-length-hash (list func)
+  (iter (with hash = (make-hash-table :test #'equal))
+	(for el :in list)
+	(setf (gethash (funcall func el) hash)
+	      (1+ (aif (gethash (funcall func el) hash)
+		       it 0)))
+	(finally (return hash))))
+
+(defun group-by-length (list func)
+  (alexandria:hash-table-alist
+   (group-by-length-hash list func)))
+
+;; (line-binding (line hoge) (f b c _ d e a) (foo))
 (in-package :cl-user)

@@ -19,13 +19,15 @@
 (defmacro def-clojure (name arglist vallist &rest clause)
   `(defun ,name ,arglist
      (let* ,vallist
-       (dlambda arg
-	 ,@(append clause
-		   (mapcar (lambda (l)
-			     (list (alexandria:make-keyword (car l))
-				   nil
-				   (car l)))
-			   vallist))))))
+       (labels ((self ()
+	 (dlambda arg
+	   ,@(append clause
+		     (mapcar (lambda (l)
+			       (list (alexandria:make-keyword (car l))
+				     nil
+				     (car l)))
+			     vallist)))))
+	 (self)))))
 
 ;; (defmacro def-clojure (name arglist vallist &rest clause)
 ;;   (let ((dlambda-arg (gensym)))

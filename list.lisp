@@ -74,14 +74,14 @@
   (the list
     (loop for i from n to (- (length l) 1) collect (nth i l))))
 
-(defun mapcar-with-index (fn l)
+(defun mapcar-with-index (fn l &key (start 0))
   (declare (list l) (optimize (speed 3) (safety 0)))
   (labels ((inner (subl c r)
 	     (if (null subl)
 		 (reverse r)
 		 (inner (cdr subl) (+ 1 c)
 			(cons (funcall fn c (car subl)) r)))))
-    (the list (funcall #'inner l 0 '()))))
+    (the list (funcall #'inner l start '()))))
 
 ;; (defmacro multiple-sort (l &rest clause)
 ;;   (labels ((subfn (expansion subc)
@@ -220,6 +220,9 @@
 	(finally (return `(,@pot (,@(make-list from :initial-element initial-element)
 				  ,@total))))))
 
+(defun append-total1 (list)
+  (append list (list (apply #'+ list))))
+
 ;; (append-group-total 2 '((0 0 0) (1 1 1) (2 2 2) (3 3 3)))
 ;; => '((0 0 0) (1 1 1) (2 2 2) (3 3 3) (2 2 2) (4 4 4))
 (defun append-group-total (n list)
@@ -233,5 +236,15 @@
 (defun repeated-list (times elements)
   (iter (for i :from 0 :to (1- times))
 	(appending elements)))
+
+(defun diff (base remover &key (test #'equal))
+  (labels ((in (subl r)
+	     (if (null subl)
+		 (reverse r)
+		 (in (cdr subl)
+		     (if (member (car subl) remover :test test)
+			 r
+			 (cons (car subl) r))))))
+    (in base nil)))
 
 (in-package :cl-user)

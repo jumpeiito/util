@@ -151,6 +151,12 @@
        (coerce v1 'list)
        (coerce v2 'list)))
 
+;; 2次元配列を開始位置から終了位置を指定して抜き出す。
+(defun row-major-aref-list (array from to)
+  (mapcar (lambda (n) (row-major-aref array n))
+	  (iota :from from :to to)))
+
+
 ;; (defparameter xl (mapcar (lambda (_) (random 100000)) (iota :from 0 :to 100000)))
 ;; (defparameter xf (map 'vector #'identity xl))
 

@@ -1,10 +1,18 @@
+(defpackage :pdf
+  (:use #:cl #:util #:kensin #:iterate #:cffi))
+
+(in-package #:pdf)
 
 (eval-when (:load-toplevel :compile-toplevel :execute)
   (require :util)
   (require :cl-pdf)
-  (use-package :cl-pdf))
+  (use-package :cl-pdf)
+  (sb-posix:setenv "path"
+		   (format nil "~A;~A"
+			   "f:\\d2txt142\\dll\\xd2txlib.dll"
+			   (sb-posix:getenv "path")) 1))
 
-(define-foreign-library xdoc
+(cffi::define-foreign-library xdoc
   (t (:default "xd2txlib")))
 
 (use-foreign-library xdoc)

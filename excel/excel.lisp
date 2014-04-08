@@ -233,7 +233,7 @@
 
 (defmacro set-color (sheet &rest args)
   `(set-%color ,sheet :Color ,@args))
-
+;; (set-color sheet "A1" :interior excel::xlred)
 ;;; (set-column-width sheet (:a :o) vector)
 (defun column-expand (start end)
   (iter (for i :from (col-to-number start) :to (col-to-number end))
@@ -433,16 +433,17 @@
 	 :LineStyle)
 	1))
 
+(defun excel-line->lisp (list)
+  (mapcar (lambda (el)
+	    (etypecase el
+	      (dt:date-time (util::to-string el))
+	      (float        (truncate el))
+	      (null	      "")
+	      (t	      el)))
+	  list))
+
 (defun excel->lisp (2dl)
-  (mapcar (lambda (line)
-	    (mapcar (lambda (el)
-		      (etypecase el
-			(dt:date-time (util::to-string el))
-			(float        (truncate el))
-			(null	      "")
-			(t	      el)))
-		    line))
-	  2dl))
+  (mapcar #'excel-line->lisp 2dl))
 
 ;; (defmacro PageSetup
 ;;     (sheet &key
