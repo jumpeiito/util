@@ -172,11 +172,11 @@
     `(let* ((,list (list-split ,target-list ,n))
 	    ,@(mapcar-with-index
 	       (lambda (i gensym)
-		 `(,gensym (sb-thread::make-thread (lambda () (,fn (nth ,i ,list))))))
+		 `(,gensym (#+sbcl sb-thread::make-thread #+clisp bt::make-thread (lambda () (,fn (nth ,i ,list))))))
 	       gensym-list))
        (append ,@(mapcar
 		  (lambda (g)
-		    `(sb-thread::join-thread ,g))
+		    `(#+sbcl sb-thread::join-thread #+clisp bt::join-thread ,g))
 		  gensym-list)))))
 
 (defmacro line-binding ((line type) args &rest forms)

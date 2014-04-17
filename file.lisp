@@ -175,15 +175,15 @@
       (sb-posix:mkdir dirname 0777))))
 
 (defun ctime (path)
-  (let ((sb-alien::*default-c-string-external-format* :SJIS))
+  #+sbcl (let ((sb-alien::*default-c-string-external-format* :SJIS))
     (sb-posix:stat-ctime (sb-posix:stat path))))
 
 (defun atime (path)
-  (let ((sb-alien::*default-c-string-external-format* :SJIS))
+  #+sbcl (let ((sb-alien::*default-c-string-external-format* :SJIS))
     (sb-posix:stat-atime (sb-posix:stat path))))
 
 (defun mtime (path)
-  (let ((sb-alien::*default-c-string-external-format* :SJIS))
+  #+sbcl (let ((sb-alien::*default-c-string-external-format* :SJIS))
     (sb-posix:stat-mtime (sb-posix:stat path))))
 
 (defmacro defun-comp-ctime (name fn)
