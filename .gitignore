@@ -1,0 +1,10 @@
+*.faslargv.fasl
+clojure.fasl
+csv.fasl
+date.fasl
+file.fasl
+hash.fasl
+list.fasl
+tree-vector.fasl
+util.fasl
+zip.fasl
