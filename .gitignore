@@ -8,3 +8,8 @@ list.fasl
 tree-vector.fasl
 util.fasl
 zip.fasl
+test.csv
+unregistered-xml.csv
+string.ml
+util.ml
+util.exe
