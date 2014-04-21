@@ -1,3 +1,4 @@
+;; -*- coding:utf-8 -*-
 ;; (eval-when (:compile-toplevel :load-toplevel :execute)
 ;;   ;; (load-with-os "test.fasl")
 ;;   )
@@ -69,38 +70,21 @@
 
 (defun csv-read (ip &key (to nil) (separator #\,))
   (labels ((scanning () (read-char ip nil nil nil)))
-      (labels ((in (c col line r)
-		 (if (and c (or (not to) (> to (length r))))
+      (labels ((in (c col line linec r)
+		 (if (and c (or (not to) (> to linec)))
 		     (char-case c
 				(#\Newline
-				 (in (scanning) '() '() (cons (reverse (cons (coerce (reverse col) 'string) line)) r)))
+				 (in (scanning) '() '() (1+ linec) (cons (reverse (cons (coerce (reverse col) 'string) line)) r)))
 				(separator
-				 (in (scanning) '() (cons (coerce (reverse col) 'string) line) r))
+				 (in (scanning) '() (cons (coerce (reverse col) 'string) line) linec r))
 				(#\Return
-				 (in (scanning) col line r))
+				 (in (scanning) col line linec r))
 				(#\"
-				 (in (scanning) col line r))
+				 (in (scanning) col line linec r))
 				(t
-				 (in (scanning) (cons c col) line r)))
+				 (in (scanning) (cons c col) line linec r)))
 		     (reverse r))))
-	(in (read-char ip nil nil nil) '() '() '()))))
-
-;; f:/20130628/特定健診全件データ.csv
-;; Evaluation took:
-;;   4.625 seconds of real time
-;;   4.468750 seconds of total run time (3.843750 user, 0.625000 system)
-;;   [ Run times consist of 1.437 seconds GC time, and 3.032 seconds non-GC time. ]
-;;   96.63% CPU
-;;   11,093,957,507 processor cycles
-;;   152,870,672 bytes consed
-
-;; Evaluation took:
-;;   3.266 seconds of real time
-;;   3.265625 seconds of total run time (3.0000000 user, 0.265625 system)
-;;   [ Run times consist of 0.563 seconds GC time, and 2.703 seconds non-GC time. ]
-;;   100.00% CPU
-;;   7,840,603,900 processor cycles
-;;   74,055,160 bytes consed
+	(in (read-char ip nil nil nil) '() '() 0 '()))))
 
 (declaim (inline get-output-stream-string char-equal))
 
