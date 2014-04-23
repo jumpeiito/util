@@ -255,6 +255,6 @@
 	      (aif (gethash result hash)
 		   (+ 1 it)
 		   1))
-	(finally (return (car (sort2 (hash-table-alist hash) > cdr))))))
+	(finally (return (caar (sort2 (hash-table-alist hash) > cdr))))))
 
 (in-package :cl-user)
