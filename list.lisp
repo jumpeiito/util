@@ -247,4 +247,14 @@
 			 (cons (car subl) r))))))
     (in base nil)))
 
+(defun most (func list)
+  (iter (with hash = (make-hash-table :test #'equal))
+	(for el :in list)
+	(for result = (funcall func el))
+	(setf (gethash result hash)
+	      (aif (gethash result hash)
+		   (+ 1 it)
+		   1))
+	(finally (return (car (sort2 (hash-table-alist hash) > cdr))))))
+
 (in-package :cl-user)

@@ -189,4 +189,5 @@
 	   #:group-by
 	   #:group-by-hash
 	   #:group-by-length
-	   #:group-by-length-hash))
+	   #:group-by-length-hash
+	   #:most))
