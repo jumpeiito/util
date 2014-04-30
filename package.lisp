@@ -190,4 +190,5 @@
 	   #:group-by-hash
 	   #:group-by-length
 	   #:group-by-length-hash
-	   #:most))
+	   #:most
+	   #:csv-string-read))

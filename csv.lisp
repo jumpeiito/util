@@ -83,8 +83,14 @@
 				 (in (scanning) col line linec r))
 				(t
 				 (in (scanning) (cons c col) line linec r)))
-		     (reverse r))))
+		     (if line
+			 (reverse (cons (reverse line) r))
+			 (reverse r)))))
 	(in (read-char ip nil nil nil) '() '() 0 '()))))
+
+(defun csv-string-read (string)
+  (with-input-from-string (i string)
+    (csv-read i)))
 
 (declaim (inline get-output-stream-string char-equal))
 
