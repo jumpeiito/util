@@ -17,7 +17,6 @@
    (:file "clojure"	:depends-on ("package"))
    (:file "file"	:depends-on ("package" "list"))
    (:file "tree-vector"	:depends-on ("utilb"))
-   ;; (:file "excel"       :depends-on ("package"))
    (:module :excel
    	    :components ((:file "package")
    			 (:file "excel" :depends-on ("package"))))

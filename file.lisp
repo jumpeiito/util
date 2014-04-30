@@ -1,5 +1,3 @@
-;; (require :asdf)
-;; (load-lib "util")
 (in-package :util)
 
 (unless (fboundp 'flatten)
@@ -82,13 +80,6 @@
 (defun allf (dir &key (type nil) (prune nil) (regexp nil))
   (declare (optimize (speed 3) (safety 0)))
   (funcall
-   ;; (if type
-   ;;     (lambda (list)
-   ;; 	 (remove-if-not
-   ;; 	  (lambda (file) (and (equal type (pathname-type file))
-   ;; 			      (if regexp (cl-ppcre:scan regexp (pathname-name file)) t)))
-   ;; 	  list))
-   ;;     #'identity)
    (lambda (list)
      (remove-if-not
       (lambda (file) (and (if TYPE (equal type (pathname-type file)) T)
@@ -98,7 +89,6 @@
 	   (allf-cut-prune (alld dir) prune))))
 
 (defun filename-basename (pathname)
-  ;; (declare (pathname pathname) (optimize (speed 3) (safety 1)))
   (if (pathnamep pathname)
       (the string (str+ (pathname-name pathname)
 			"."
@@ -210,7 +200,6 @@
 (defun exists (dirlist)
   (find-if #'cl-fad:file-exists-p dirlist))
 
-;; #P"f:/20130628/kmove/hoge.xls" -> #P"f:/20130628/kmove/"
 (defun base-directory (pathname)
   (make-pathname :defaults pathname
 		 :name nil :type nil))

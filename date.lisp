@@ -1,6 +1,3 @@
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (load-lib "iterate")
-;;   (load-lib "util"))
 (in-package :util)
 
 (declaim (ftype (function (string fixnum) fixnum) gengou->year))
@@ -78,11 +75,6 @@
   (format nil "~A年~2,'0d月" (date-year date)
 	  (date-month date)))
 
-;; 20120714
-;; 2012-07-14 2012/07/14 2012/7/14 2012.07.14
-;; S55.7.14 H24.7.14 H24/7/14 H24-7-14
-;; 昭和55年7月14日 2012年7月14日
-
 (defmacro rxmatch-case (str &rest clause)
   (declare (string str) (optimize (speed 3) (safety 0)))
   `(cond
@@ -134,13 +126,6 @@
   (write-to-string (+ (gethash g gengou) yy)))
 (defmethod  gengou->seireki (g (yy String))
   (gengou->seireki g (read-from-string yy)))
-
-;; (defun gengou->seireki (g yy)
-;;   (write-to-string
-;;    (+ (funcall (cond
-;; 		 ((stringp yy)  #'read-from-string)
-;; 		 ((integerp yy) #'identity)
-;; 		 (t (error "Argument Error"))) yy) (gethash g gengou))))
 
 (defun gengou->year (g yy)
   (+ (funcall (cond

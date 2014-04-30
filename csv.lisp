@@ -1,7 +1,4 @@
 ;; -*- coding:utf-8 -*-
-;; (eval-when (:compile-toplevel :load-toplevel :execute)
-;;   ;; (load-with-os "test.fasl")
-;;   )
 (in-package :util)
 
 (defparameter alph "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -60,13 +57,6 @@
 		    (the vector (ary))
 		    (the vector (ary))
 		    (the vector (ary))))))
-
-;; (defun csv-read (filename &key (code :UTF8) (to nil))
-;;   (declare (optimize (speed 3) (safety 0) (debug 0)))
-;;   (with-open-file (ip filename :external-format (list code))
-;;     (csv-read-core ip :to to)))
-
-;; #P"f:/kcsv2/00263129_FKAC522_20130619_011.csv"
 
 (defun csv-read (ip &key (to nil) (separator #\,))
   (labels ((scanning () (read-char ip nil nil nil)))
@@ -132,9 +122,6 @@
 		     (char-case c
 				(#\Newline
 				 (in scan col '()
-				     ;; (let* ((o (get-output-stream-string col))
-				     ;; 	    (l (funcall func rev)))
-				     ;;   (if (funcall pred l) (cons l r) r))
 				     (let* ((o (get-output-stream-string col))
 					    (_rev rev))
 				       (if (funcall pred _rev)
@@ -197,42 +184,6 @@
 				(reverse r))))))))))
     (in scan (make-string-output-stream) '() '()))))
 
-;; (defun csv-read (ip &key (to nil) (separator #\,))
-;;   (declare (optimize (speed 3) (safety 0) (debug 0))
-;; 	   (type stream ip))
-;;   (symbol-macrolet ((scan (read-char ip nil nil nil)))
-;;     (labels ((in (c col line r)
-;; 	       (if (and c (or (not to) (> (the fixnum to)
-;; 					  (the fixnum (length (the list r))))))
-;; 		   (char-case c
-;; 			      (#\Newline
-;; 			       (let ((o (get-output-stream-string col)))
-;; 				 (in scan col '() (cons (reverse (cons o line)) r))))
-;; 			      (separator
-;; 			       (let ((o (get-output-stream-string col)))
-;; 				 (in scan col (cons o line) r)))
-;; 			      (#\Return
-;; 			       (in scan col line r))
-;; 			      (#\"
-;; 			       (in scan col line r))
-;; 			      (t
-;; 			       (progn
-;; 				 (write-char c col)
-;; 				 (in scan col line r))))
-;; 		   (let ((o (get-output-stream-string col)))
-;; 		     (optima:match (list o line)
-;; 		       ((LIST "" nil) (reverse r))
-;; 		       (_
-;; 			(reverse (cons (reverse (cons o line)) r))))))))
-;;     (in scan (make-string-output-stream) '() '()))))
-
-;; (defun csv-read-to-list
-;;     (filename &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
-;; 		(to nil) (separator #\,))
-;;   ;; (with-open-file (ip filename :external-format (list code))
-;;   (with-open-file (ip filename :external-format code)
-;;     (csv-read ip :to to :separator separator)))
-
 (defun csv-read-to-list
     (filename &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
 		(to nil) (separator #\,))
@@ -242,9 +193,7 @@
 (defun csv-read-iter
     (filename func &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
 		(to nil) (separator #\,))
-  ;; (with-open-file (ip filename :external-format (list code))
   (with-open-file (ip filename :external-format code)
-    ;; (csv-read ip :to to :separator separator)
     (%read-iter ip func :to to :separator separator)))
 
 (defun csv-read-filter-map
@@ -319,10 +268,6 @@
 (defun divide (a b)
   (values (truncate (/ a b)) (mod a b)))
 
-;; (defun test (target num)
-;;   (labels ((sub (subt num r)
-;; 	     (mvbind ())))))
-
 (defun excel-row->number (excel-row)
   (declare (string excel-row) (optimize (speed 3) (safety 0)))
   (labels ((subfn (subl counter acc)
@@ -337,8 +282,6 @@
 	     0 0)))
 
 (defun csv-read-array (filename row-size column-size &key (code :SJIS))
-  ;; (declare (type integer row-size column-size)
-  ;; 	   (optimize (speed 3) (safety 0) (debug 0)))
   (with-open-file (file filename :direction :input :external-format code)
     (iter (with array = (make-array `(,row-size ,column-size)))
 	  (with row   = 0)
@@ -362,5 +305,5 @@
 	  	   col (+ col 1)))
 	    (t
 	     (setf charl (cons c charl)))))))
-;; #P"f:/kcsv2/00263129_FKAC522_20130618_050.csv"
+
 (in-package :cl-user)

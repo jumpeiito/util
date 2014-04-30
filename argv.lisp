@@ -1,5 +1,3 @@
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (load-lib "list"))
 (in-package :util)
 ;; (optcase
 ;;  ("-a" "--hoge")    string-case

@@ -1,9 +1,5 @@
 (in-package :util)
 
-;; (unless (fboundp 'str+)
-;;   (defmacro str+ (&rest args)
-;;     `(concatenate 'string ,@args)))
-
 (defmacro dbind (&rest arg)
   `(destructuring-bind ,@arg))
 
@@ -33,12 +29,6 @@
   `(if ,val
        (let ((,sym ,val)) ,ifbody)
        ,@elsebody))
-
-;; (defun os-expand (pathname)
-;;   (str+ (if (asdf::os-windows-p)
-;; 	    "f:/"
-;; 	  "/media/DE13-7421/")
-;; 	pathname))
 
 (defun compose (&rest functions)
   "Compose FUNCTIONS right-associatively, returning a function"
@@ -71,9 +61,6 @@
 	  `(lambda (,cutarg) ,(funcall #'%inner parameter '()))))))
 
 (defmacro aif (test thenbody &optional elsebody)
-  ;; `(if ,test
-  ;; 	 (let ((it ,test)) ,thenbody)
-  ;; 	 ,elsebody)
   `(let ((it ,test))
      (if it ,thenbody ,elsebody)))
 
@@ -102,14 +89,6 @@
 (defmacro any (list)
   `(or ,@list))
 
-;; (defmacro acond (&rest clause)
-;;   (if clause
-;;       `(let1 it ,(caar clause)
-;; 	 (if it
-;; 	     (progn ,@(cdar clause))
-;; 	     (acond ,@(cdr clause))))
-;;       nil))
-
 (defmacro with-obj-slots (instance &body body)
   `(with-slots ,(mapcar #'c2mop:slot-definition-name
 			(c2mop::class-slots (class-of instance))) ,instance
@@ -131,8 +110,6 @@
   (if (keywordp (car args))
       (let ((function (gensym)))
 	`(lambda (,function) (funcall ,function ,@args)))
-      ;; (funcall ,(symbol-function (car args))
-      ;; 	       ,@(cdr args))
       `(funcall ,@args)))
 
 
@@ -219,5 +196,4 @@
   (alexandria:hash-table-alist
    (group-by-length-hash list func)))
 
-;; (line-binding (line hoge) (f b c _ d e a) (foo))
 (in-package :cl-user)

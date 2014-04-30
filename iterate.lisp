@@ -1,27 +1,5 @@
 (in-package :util)
 
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (require :iterate)
-;;   (load-lib "csv")
-;;   (import '(iterate:iter
-;; 	    iterate:for
-;; 	    iterate:repeat
-;; 	    iterate:collect
-;; 	    iterate:counting
-;; 	    iterate:maximize
-;; 	    iterate:generating
-;; 	    iterate:next
-;; 	    iterate:sum
-;; 	    iterate:with
-;; 	    iterate:finally
-;; 	    iterate::return
-;; 	    iterate:appending
-;; 	    iterate:first-time-p
-
-;; 	    iterate:defmacro-clause
-;; 	    iterate:defmacro-driver
-;; 	    )))
-
 (defmacro-driver (FOR var IN-CSV filename &optional CODE code)
   `(progn
      (for ,var :in (csv-read-to-list ,filename :code ,code))))

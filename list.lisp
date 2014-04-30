@@ -25,17 +25,6 @@
 	(for counter :upfrom counter-start)
 	(funcall function el counter)))
 
-;; (defmacro for-each-with-index (fn l)
-;;   (declare (list l) (optimize (speed 3) (safety 0)))
-;;   `(let ((fewilist ,l))
-;;      (dotimes (i (length fewilist))
-;;        (funcall ,fn i (nth i fewilist)))))
-
-;; (defun nthcar (nth l)
-;;   (iter (for el :in l)
-;; 	(for i :upfrom 1)
-;; 	(if ())))
-
 (defun nthcar (nth l)
   (declare (fixnum nth) (optimize (speed 3) (safety 0)))
   (loop for i from 0 to nth collect (nth i l)))
@@ -83,13 +72,6 @@
 			(cons (funcall fn c (car subl)) r)))))
     (the list (funcall #'inner l start '()))))
 
-;; (defmacro multiple-sort (l &rest clause)
-;;   (labels ((subfn (expansion subc)
-;; 	     (if (null subc)
-;; 		 expansion
-;; 		 (subfn `(the list (sort (the list ,expansion)
-;; 					 (lambda (x y) ,(car subc)))) (cdr subc)))))
-;;     (subfn (copy-list l) clause)))
 (defmacro multiple-sort (l &rest clause)
   (if (null clause)
       l
@@ -106,7 +88,6 @@
     (the array (funcall #'fn l (make-array 0 :adjustable t :fill-pointer t)))))
 
 (defmacro cell (2dl ary)
-  ;; `(nth ,(cdr ary) (nth ,(car ary) ,2dl))
   `(destructuring-bind (y x) ',ary
      (nth (1- x) (nth (1- y) ,2dl))))
 
@@ -181,14 +162,6 @@
 
 (defun compact (list)
   (remove-if-not #'identity list))
-
-;; (defun classify-multiple-value (testfn list)
-;;   (iter (for el in list)
-;;   	(if (funcall testfn el)
-;;   	    (collect el :into succeed)
-;;   	    (collect el :into failure))
-;;   	(finally (return (values succeed failure))))
-;;   )
 
 (defun find-if->index (pred list)
   (labels ((inner (subl counter)

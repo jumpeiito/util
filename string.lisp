@@ -1,7 +1,3 @@
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (require :alexandria)
-;;   (require :cl-ppcre)
-;;   (load-lib "util"))
 (in-package :util)
 
 (defmacro tr (&rest args)
@@ -28,8 +24,6 @@
   (coerce "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｯｬｭｮ" 'list))
 (defparameter postkana
   (coerce "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョ" 'list))
-;; (defparameter preopt    "-")
-;; (defparameter postopt   "－")
 
 (defparameter kanalist
   (alexandria:alist-hash-table
@@ -108,8 +102,6 @@
 	(finally (return hash))))
 
 (defparameter h2z (tr-making-hash
-		   ;; (string-join `(,prealnum ,prekigou ,preroman ,prekana) "")
-		   ;; (string-join `(,postalnum ,postkigou ,postroman ,postkana) "")
 		   (append prealnum prekigou preroman prekana)
 		   (append postalnum postkigou postroman postkana)))
 
@@ -124,12 +116,9 @@
 	   (declare (type character char))
 	   (collect (aif (gethash char ,hash nil)
 	   		 ;; 置き換えられないものをわかりやすくするために、リストでくくっておく。
-	   		 it (list char)))
-	   ;; (print char)
-	   )))
+	   		 it (list char))))))
 
 (def-zh-core to-hankaku-core z2h)
-;; (def-zh-core to-zenkaku-core h2z)
 
 (defun to-hankaku-core2 (strlist)
   "第二段階の変換。リストでくくってある濁音・半濁音を置き換える。
@@ -142,10 +131,6 @@
 		       (list char))
 		   :into pot)
 	(finally (return (coerce pot 'string)))))
-
-;; (#\KATAKANA_LETTER_HI (#\HALFWIDTH_KATAKANA_SEMI-VOICED_SOUND_MARK)
-;; 		      #\KATAKANA_LETTER_N #\KATAKANA_LETTER_HO
-;; 		      (#\HALFWIDTH_KATAKANA_SEMI-VOICED_SOUND_MARK) #\KATAKANA_LETTER_N)
 
 (defmacro def-zh (name &key primary-function secondary-function)
   ;; 第一段階 ハッシュで置き換えられるものをすべて置き換える。
@@ -163,10 +148,6 @@
 (def-zh to-hankaku
     :primary-function to-hankaku-core :secondary-function to-hankaku-core2)
 
-;; (Defun to-zenkaku-core (str)
-;;   (iter (for c :in-string (reverse str))
-;; 	))
-
 (defun to-zenkaku (str)
   (declare (optimize (speed 3) (safety 0) (debug 0))
 	   (type simple-string str))
@@ -182,10 +163,6 @@
 				 it c)
 			    pot)))
 	(finally (return (coerce (reverse pot) 'string)))))
-
-
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (require :cl-test-more))
 
 (defmacro testf (func got expected desc)
   `(cl-test-more:is (,func ,got) ,expected (format nil "~A ~A" ',func ,desc)))
@@ -225,10 +202,6 @@
   (testf to-zenkaku ""		""			"空白テスト1")
   (testf to-zenkaku " "		"　"			"空白テスト2"))
 
-;; (eval-when (:load-toplevel :compile-toplevel :execute)
-;;   (to-hankaku-test)
-;;   (to-zenkaku-test))
-
 (defmacro str+ (&rest args)
   `(concatenate 'string ,@args))
 
@@ -243,148 +216,6 @@
   (multiple-value-bind (num len) (read-from-string str)
     (declare (ignore len))
     num))
-
-;; (defun substring (str start end)
-;;   (coerce (loop for i from start to end collect (aref str i))
-;; 	  'string))
-
-
-
-;; (defun string-tr-expand (strsym)
-;;   ;; (declare (optimize (speed 3) (safety 0)))
-;;   (if (ppcre:scan "-" strsym)
-;;       (let1 l (mapcar (compose #'char-int (lambda (s) (aref s 0)))
-;; 		      (split-string strsym "-"))
-;; 	(coerce
-;; 	 (mapcar
-;; 	  #'code-char
-;; 	  (loop for i from (first l) to (second l) collect i))
-;; 	 'string))
-;;       strsym))
-
-;; (defun char->string-tr-expand (charl)
-;;   (coerce
-;;    (reverse (string-tr-expand (coerce charl 'string)))
-;;    'list))
-
-;; (defun string-tr-core (str)
-;;   ;; (declare (string str) (optimize (speed 3) (safety 0)))
-;;   (labels ((fn (subl r)
-;; 	     (if subl
-;; 		 (if (and (char-equal (car subl) #\-) (cdr subl))
-;; 		     (funcall #'fn (nthcdr 2 subl)
-;; 			      (cons (char->string-tr-expand (list (car r) (car subl) (second subl))) (cdr r)))
-;; 		     (funcall #'fn (cdr subl) (cons (car subl) r)))
-;; 		 (coerce (reverse (flatten r)) 'string))))
-;;     (funcall #'fn (coerce str 'list) '())))
-
-
-
-;; (defun string-tr (str hash)
-;;   ;; (declare (string str pre post) (optimize (speed 3) (safety 0)))
-;;   (labels ((fn (substr)
-;; 	     (dotimes (j (length substr))
-;; 	       (aif (gethash (aref substr j) hash)
-;; 		    (setf (aref substr j) it)))
-;; 	     substr))
-;;     (fn (copy-seq str))))
-
-;; 拡張可能のベクタ
-;; CL-USER> (defparameter a (make-array 0 :adjustable t :fill-pointer t))
-;; A
-;; CL-USER> a
-;; #()
-;; CL-USER> (vector-push-extend 'abc a)
-;; 0
-;; CL-USER> a
-;; #(ABC)
-;; CL-USER> (vector-push-extend 'xyz a)
-;; 1
-;; CL-USER> a
-;; #(ABC XYZ)
-;; (defparameter test01 "ｱﾌﾞﾗｶﾀﾌﾞﾗ")
-;; (defparameter test02 "ﾊｯﾌﾟﾝ")
-
-;; (defparameter list01 "ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポヴ")
-;; (defparameter list02 "ﾊﾋﾌﾍﾎｳ")
-
-;; (defun to/sub-core (str)
-;;   (mapcar #'char-int
-;; 	  (reverse (coerce str 'list))))
-
-;; (defun to/sub-return (charint-list)
-;;   (coerce (mapcar #'code-char charint-list)
-;; 	  'string))
-
-;; (defmacro to-zenhan-sub-defun
-;;     (name attachfn hash-table true false)
-;;   `(defun ,name (str)
-;;      (labels ((in (subl pre r)
-;; 		(if (null subl)
-;; 		    (to/sub-return r)
-;; 		    (in (cdr subl)
-;; 			(car subl)
-;; 			(aif (gethash (funcall ,attachfn (car subl))
-;; 				      ,hash-table nil)
-;; 			     ,true ,false)))))
-;;        (in (to/sub-core str) 0 ()))))
-
-;; ;; (to-zenhan-sub-defun to-zenkaku-sub
-;; ;; 		     (lambda (car) (list pre car))
-;; ;; 		     kanalist
-;; ;; 		     (cons it r)
-;; ;; 		     (if (or (eq (car subl) 65438)
-;; ;; 			     (eq (car subl) 65439))
-;; ;; 			 r
-;; ;; 			 (cons (car subl) r)))
-;; (defun to-zenkaku-sub (str)
-;;   (labels ((in (subl pre r)
-;; 	     (if (null subl)
-;; 		 (to/sub-return r)
-;; 		 (in (cdr subl) (car subl)
-;; 		     (aif (or (gethash (list pre (car subl)) kanalist)
-;; 			      (gethash (list (car subl)) kanalist))
-;; 			  (cons it r)
-;; 			  (if (or (eq (car subl) 65438)
-;; 				  (eq (car subl) 65439))
-;; 			      r
-;; 			      (cons (car subl) r)))))))
-;;     (in (to/sub-core str) 0 '())))
-
-;; (defun to-zenkaku-sub (str)
-;;   (labels ((in (subl pre r)
-;; 	     (if (null subl)
-;; 		 (to/sub-return r)
-;; 		 (aif (gethash (list pre (car subl)) kanalist nil)
-;; 		      (in (cdr subl) (car subl) (cons it r))
-;; 		      (in (cdr subl) (car subl)
-;; 			  (if (or (eq (car subl) 65438)
-;; 				  (eq (car subl) 65439))
-;; 			      r
-;; 			      (cons (car subl) r)))))))
-;;     (in (to/sub-core str) 0 '())))
-
-;; (to-zenhan-sub-defun to-hankaku-sub
-;; 		     #'identity
-;; 		     kanalist-vice
-;; 		     (append (car it) r)
-;; 		     (cons (car subl) r))
-
-;; ;; (defun to-hankaku-sub (str)
-;; ;;   (labels ((in (subl r)
-;; ;; 	     (if (null subl)
-;; ;; 		 (to/sub-return r)
-;; ;; 		 (in (cdr subl)
-;; ;; 		     (aif (gethash (car subl) kanalist-vice nil)
-;; ;; 			  (append (car it) r)
-;; ;; 			  (cons (car subl) r))))))
-;; ;;     (in (to/sub-core str) '())))
-
-;; (defun to-zenkaku (str)
-;;   (string-tr (to-zenkaku-sub str) h2z))
-
-;; (defun to-hankaku (str)
-;;   (string-tr (to-hankaku-sub str) z2h))
 
 (defun number-with-keta (num keta)
   (declare (fixnum keta) (optimize (speed 3) (safety 0)))
@@ -485,14 +316,6 @@
 	       ((list x)       (reverse r)))))
     (in list '())))
 
-;; (defun string-match-number-expand
-;;     (number-list str &key (from 0))
-;;   (mapcar (lambda (l)
-;;   	    (cl-match:match l
-;;   	      ((list x '*) `(,x (length ,str)))
-;;   	      ((list x y)  `(,x ,y))))
-;;   	  (duo (cons from number-list))))
-
 ;; (string-match "hoge,foo,buz" ((x 5) (y 4))
 ;;   (list x y))
 ;;   ==
@@ -511,34 +334,6 @@
 ;; (string-match "hoge,foo,buz" ((_ 2) (x 5) (y *))
 ;;   (list x y))
 ;; --> ("ge,fo" "o,buz")
-;; (defmacro string-match (str pattern &rest body)
-;;   (cl-match:match str
-;;     ((type string)
-;;      `(let ,(mapcar
-;; 	     (lambda (sym pair) `(,sym (subseq ,str ,@pair)))
-;; 	     (mapcar #'first pattern)
-;; 	     (string-match-number-expand (mapcar #'second pattern) (length str)))
-;; 	,@body))
-;;     ))
-;; (defmacro string-match (str pattern &rest body)
-;;   `(let ,(remove-if-not
-;; 	  #'identity
-;; 	  (mapcar
-;; 	   (lambda (sym pair)
-;; 	     (if (equal '* sym) nil `(,sym (subseq ,str ,@pair))))
-;; 	   (mapcar #'first pattern)
-;; 	   ;; (string-match-number-expand (mapcar #'second pattern) str)
-;; 	   ))
-;;      ,@body))
-
-
-;; (defun string-match-test ()
-;;   (cl-test-more:is (string-match "hoge,foo,buz" ((x 5) (y 4)) (list x y))
-;; 		   `("hoge," "foo,"))
-;;   (cl-test-more:is (string-match "hoge,foo,buz" ((x 5) (y 2) (z *)) (list x y z))
-;; 		   `("hoge," "fo" "o,buz"))
-;;   (cl-test-more:is (string-match "hoge,foo,buz" ((* 2) (x 5) (y *)) (list x y))
-;; 		   `("ge,fo" "o,buz")))
 
 (defun explode (string)
   (declare (optimize (speed 3) (safety 0) (debug 0))

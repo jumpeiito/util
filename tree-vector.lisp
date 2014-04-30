@@ -156,11 +156,4 @@
   (mapcar (lambda (n) (row-major-aref array n))
 	  (iota :from from :to to)))
 
-
-;; (defparameter xl (mapcar (lambda (_) (random 100000)) (iota :from 0 :to 100000)))
-;; (defparameter xf (map 'vector #'identity xl))
-
-;; (time (find-if (lambda (el) (eq el 100001)) xl))
-;; (time (vector-find-if (lambda (el) (eq el 100001)) xf))
-
 (in-package :cl-user)
