@@ -568,4 +568,16 @@
 		   (reverse r)))))
     (inner string nil)))
 
+(defmacro with-decoding-error (try catch)
+  `(handler-case (progn ,@try)
+     (sb-int:stream-decoding-error (e)
+       (declare (ignore e))
+       (progn ,@catch))))
+
+(defun file-coding (file)
+  (with-decoding-error
+      ((if (csv-read-to-list file :code :UTF8 :to 1)
+	  :UTF8))
+    (:SJIS)))
+
 (in-package :cl-user)

@@ -191,4 +191,6 @@
 	   #:group-by-length
 	   #:group-by-length-hash
 	   #:most
-	   #:csv-string-read))
+	   #:csv-string-read
+	   #:with-decoding-error
+	   #:file-coding))
