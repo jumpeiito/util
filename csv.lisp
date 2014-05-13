@@ -111,15 +111,19 @@
     (in scan (make-string-output-stream) '() 0))))
 
 (defun %read-map-filter (ip func pred &key (to nil) (separator #\,))
-  (declare (optimize (speed 3) (safety 0) (debug 0))
+  (declare (optimize (speed 3) (safety 0) (debug 0) (compilation-speed 0) (space 0))
 	   (type stream ip))
   (symbol-macrolet ((scan (read-char ip nil nil nil)))
     (labels ((in (c col line r)
+	       (declare (dynamic-extent c col line r))
 	       (symbol-macrolet ((acc (cons o line))
 				 (rev (reverse (cons o line))))
 		 (if (and c (or (not to) (> (the fixnum to)
 					    (the fixnum (length (the list r))))))
 		     (char-case c
+				(separator
+				 (let ((o (get-output-stream-string col)))
+				   (in scan col acc r)))
 				(#\Newline
 				 (in scan col '()
 				     (let* ((o (get-output-stream-string col))
@@ -127,9 +131,6 @@
 				       (if (funcall pred _rev)
 					   (cons (funcall func _rev) r)
 					   r))))
-				(separator
-				 (let ((o (get-output-stream-string col)))
-				   (in scan col acc r)))
 				(#\Return
 				 (in scan col line r))
 				(#\"
@@ -139,13 +140,13 @@
 				   (write-char c col)
 				   (in scan col line r))))
 		     (let ((o (get-output-stream-string col)))
-		       (optima:match (list o line)
-			 ((LIST "" nil) (reverse r))
-			 (_
-			  (let ((l (funcall func rev)))
-			    (if (funcall pred l)
-				(reverse (cons l r))
-				(reverse r))))))))))
+		       (declare (dynamic-extent o))
+		       (if (and (string-null o) (not line))
+			   (reverse r)
+			   (let ((l (funcall func rev)))
+		       	    (if (funcall pred l)
+		       		(reverse (cons l r))
+		       		(reverse r)))))))))
     (in scan (make-string-output-stream) '() '()))))
 
 (defun %read-filter-map (ip func pred &key (to nil) (separator #\,))

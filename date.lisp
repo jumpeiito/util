@@ -203,7 +203,7 @@
 
 (defun strdt (string &key (function #'make-date-literally))
   (declare (type simple-string string)
-	   (optimize (speed 3) (safety 0) (debug 0) (space 0)))
+	   (optimize (speed 3) (safety 0) (debug 0) (space 0) (compilation-speed 0)))
   (irrcase (the simple-string string)
 	   ((year (integer :length 4)) (or #\- #\/ #\. #\  #\年) (* (space))
 	    (month (integer :max-length 2)) (or #\- #\/ #\. #\  #\月) (* (space))
