@@ -85,22 +85,24 @@
 (declaim (inline get-output-stream-string char-equal))
 
 (defun %read-iter (ip func &key (to nil) (separator #\,))
-  (declare (optimize (speed 3) (safety 0) (debug 0))
-	   (type stream ip))
+  ;; (declare (optimize (speed 3) (safety 0) (debug 0) (compilation-speed 0) (space 0))
+  ;; 	   (type stream ip)
+  ;; 	   (type (or nil fixnum) to))
   (symbol-macrolet ((scan (read-char ip nil nil nil)))
     (labels ((in (c col line counter)
+	       ;; (declare (dynamic-extent c col line))
 	       (if (and c (or (not to) (> (the fixnum to)
 					  (the fixnum counter))))
 		   (char-case c
-			      (#\Newline
-			       (let* ((o (get-output-stream-string col)))
-				 (funcall func (reverse (cons o line)))
-				 (in scan col '() (incf counter))))
 			      (separator
 			       (let ((o (get-output-stream-string col)))
 				 (in scan col (cons o line) counter)))
 			      (#\Return
 			       (in scan col line counter))
+			      (#\Newline
+			       (let* ((o (get-output-stream-string col)))
+				 (funcall func (reverse (cons o line)))
+				 (in scan col '() (incf (the integer counter)))))
 			      (#\"
 			       (in scan col line counter))
 			      (t
@@ -123,11 +125,13 @@
 		     (char-case c
 				(separator
 				 (let ((o (get-output-stream-string col)))
+				   (declare (dynamic-extent o))
 				   (in scan col acc r)))
 				(#\Newline
 				 (in scan col '()
 				     (let* ((o (get-output-stream-string col))
 					    (_rev rev))
+				       (declare (dynamic-extent o _rev))
 				       (if (funcall pred _rev)
 					   (cons (funcall func _rev) r)
 					   r))))
@@ -188,6 +192,7 @@
 (defun csv-read-to-list
     (filename &key (code #+sbcl :UTF8 #+clisp charset:utf-8)
 		(to nil) (separator #\,))
+  (declare (optimize speed))
   (with-open-file (ip filename :external-format code)
     (%read-filter-map ip #'identity #'identity :to to :separator separator)))
 
