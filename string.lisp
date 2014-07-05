@@ -365,7 +365,12 @@
 
 (defmacro with-decoding-error (try catch)
   `(handler-case (progn ,@try)
-     (sb-int:stream-decoding-error (e)
+     (#+sbcl sb-int:stream-decoding-error #+clisp system::simple-stream-error
+       (e)
+       (declare (ignore e))
+       (progn ,@catch))
+     (#+sbcl sb-impl::malformed-shift_jis #+clisp system::simple-stream-error
+       (e)
        (declare (ignore e))
        (progn ,@catch))))
 
